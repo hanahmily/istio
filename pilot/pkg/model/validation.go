@@ -1203,6 +1203,12 @@ func ValidateProxyConfig(config *meshconfig.ProxyConfig) (errs error) {
 		}
 	}
 
+	if config.EnvoyAlsAddress != "" {
+		if err := ValidateProxyAddress(config.EnvoyAlsAddress); err != nil {
+			errs = multierror.Append(errs, multierror.Prefix(err, fmt.Sprintf("invalid envoy gRPC access log service (ALS) address %q:", config.EnvoyAlsAddress)))
+		}
+	}
+
 	if err := ValidatePort(int(config.ProxyAdminPort)); err != nil {
 		errs = multierror.Append(errs, multierror.Prefix(err, "invalid proxy admin port:"))
 	}

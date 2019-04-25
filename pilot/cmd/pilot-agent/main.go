@@ -72,6 +72,7 @@ var (
 	connectTimeout             time.Duration
 	statsdUDPAddress           string
 	envoyMetricsServiceAddress string
+	envoyAlsAddress            string
 	proxyAdminPort             uint16
 	controlPlaneAuthPolicy     string
 	customConfigFile           string
@@ -204,6 +205,7 @@ var (
 			proxyConfig.ConnectTimeout = types.DurationProto(connectTimeout)
 			proxyConfig.StatsdUdpAddress = statsdUDPAddress
 			proxyConfig.EnvoyMetricsServiceAddress = envoyMetricsServiceAddress
+			proxyConfig.EnvoyAlsAddress = envoyAlsAddress
 			proxyConfig.ProxyAdminPort = int32(proxyAdminPort)
 			proxyConfig.Concurrency = int32(concurrency)
 
@@ -535,6 +537,8 @@ func init() {
 		"IP Address and Port of a statsd UDP listener (e.g. 10.75.241.127:9125)")
 	proxyCmd.PersistentFlags().StringVar(&envoyMetricsServiceAddress, "envoyMetricsServiceAddress", values.EnvoyMetricsServiceAddress,
 		"Host and Port of an Envoy Metrics Service API implementation (e.g. metrics-service:15000)")
+	proxyCmd.PersistentFlags().StringVar(&envoyAlsAddress, "envoyAlsAddress", values.EnvoyAlsAddress,
+		"Host and Port of an Envoy gRPC Access Log Service (ALS)")
 	proxyCmd.PersistentFlags().Uint16Var(&proxyAdminPort, "proxyAdminPort", uint16(values.ProxyAdminPort),
 		"Port on which Envoy should listen for administrative commands")
 	proxyCmd.PersistentFlags().StringVar(&controlPlaneAuthPolicy, "controlPlaneAuthPolicy",

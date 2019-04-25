@@ -34,6 +34,7 @@ import (
 	meshconfig "istio.io/api/mesh/v1alpha1"
 	"istio.io/istio/pkg/bootstrap/platform"
 	"istio.io/istio/pkg/env"
+	"istio.io/istio/pkg/features/pilot"
 	"istio.io/istio/pkg/log"
 	"istio.io/istio/pkg/spiffe"
 )
@@ -337,6 +338,15 @@ func WriteBootstrap(config *meshconfig.ProxyConfig, node string, epoch int, pilo
 			return "", err
 		}
 		StoreHostPort(h, p, "envoy_metrics_service", opts)
+	}
+
+	if config.EnvoyAlsAddress != "" {
+		h, p, err = GetHostPort("envoy access log service", config.EnvoyAlsAddress)
+		if err != nil {
+			return "", err
+		}
+		StoreHostPort(h, p, "envoy_als", opts)
+		opts["envoy_als_cluster"] = pilot.EnvoyALSCluster
 	}
 
 	fout, err := os.Create(fname)

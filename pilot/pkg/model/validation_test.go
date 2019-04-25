@@ -605,6 +605,7 @@ func TestValidateProxyConfig(t *testing.T) {
 		ServiceCluster:             "istio-proxy",
 		StatsdUdpAddress:           "istio-statsd-prom-bridge.istio-system:9125",
 		EnvoyMetricsServiceAddress: "metrics-service.istio-system:15000",
+		EnvoyAlsAddress:            "als.istio-system:9100",
 		ControlPlaneAuthPolicy:     1,
 		Tracing:                    nil,
 	}
@@ -683,6 +684,11 @@ func TestValidateProxyConfig(t *testing.T) {
 		{
 			name:    "envoy metrics service address invalid",
 			in:      modify(valid, func(c *meshconfig.ProxyConfig) { c.EnvoyMetricsServiceAddress = "metrics-service.istio-system" }),
+			isValid: false,
+		},
+		{
+			name:    "envoy als address invalid",
+			in:      modify(valid, func(c *meshconfig.ProxyConfig) { c.EnvoyMetricsServiceAddress = "als.istio-system" }),
 			isValid: false,
 		},
 		{
@@ -913,6 +919,7 @@ func TestValidateProxyConfig(t *testing.T) {
 		ServiceCluster:             "",
 		StatsdUdpAddress:           "10.0.0.100",
 		EnvoyMetricsServiceAddress: "metrics-service",
+		EnvoyAlsAddress:            "als",
 		ControlPlaneAuthPolicy:     -1,
 		Tracing: &meshconfig.Tracing{
 			Tracer: &meshconfig.Tracing_Zipkin_{
@@ -930,7 +937,7 @@ func TestValidateProxyConfig(t *testing.T) {
 		switch err := err.(type) {
 		case *multierror.Error:
 			// each field must cause an error in the field
-			if len(err.Errors) != 12 {
+			if len(err.Errors) != 13 {
 				t.Errorf("expected an error for each field %v", err)
 			}
 		default:

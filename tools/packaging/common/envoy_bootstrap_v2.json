@@ -241,6 +241,22 @@
         ]
       }
       {{ end }}
+      {{ if .envoy_als }}
+      ,
+      {
+        "name": "{{ .envoy_als_cluster }}",
+        "type": "STRICT_DNS",
+        "connect_timeout": "5s",
+        "lb_policy": "ROUND_ROBIN",
+        "http2_protocol_options": {},
+        "hosts": [
+          {
+            "socket_address": {{ .envoy_als }}
+          }
+        ]
+      }
+
+      {{ end }}
     ],
     "listeners":[
       {

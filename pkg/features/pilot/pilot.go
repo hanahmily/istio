@@ -140,6 +140,9 @@ var (
 	DisableXDSMarshalingToAny    = func() bool {
 		return disableXDSMarshalingToAnyVar.Get() == "1"
 	}
+
+	// EnvoyALSCluster to forward envoy's access log to gRPC Access Log Service
+	EnvoyALSCluster = "envoy_als"
 )
 
 var (

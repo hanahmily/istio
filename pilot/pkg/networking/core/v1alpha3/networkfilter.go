@@ -17,8 +17,9 @@ package v1alpha3
 import (
 	"fmt"
 
+	"github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	"github.com/envoyproxy/go-control-plane/envoy/api/v2/listener"
-	fileaccesslog "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v2"
+	accesslogconfig "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v2"
 	accesslog "github.com/envoyproxy/go-control-plane/envoy/config/filter/accesslog/v2"
 	mongo_proxy "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/mongo_proxy/v2"
 	mysql_proxy "github.com/envoyproxy/go-control-plane/envoy/config/filter/network/mysql_proxy/v1alpha1"
@@ -29,6 +30,11 @@ import (
 	"istio.io/istio/pilot/pkg/model"
 	istio_route "istio.io/istio/pilot/pkg/networking/core/v1alpha3/route"
 	"istio.io/istio/pilot/pkg/networking/util"
+	"istio.io/istio/pkg/features/pilot"
+)
+
+const (
+	commonEnvoyALSLogName = "common_envoy_als_log"
 )
 
 // buildInboundNetworkFilters generates a TCP proxy network filter on the inbound path
@@ -47,7 +53,7 @@ func buildInboundNetworkFilters(env *model.Environment, node *model.Proxy, insta
 // TcpProxy instance and builds a TCP filter out of it.
 func setAccessLogAndBuildTCPFilter(env *model.Environment, node *model.Proxy, config *tcp_proxy.TcpProxy) *listener.Filter {
 	if env.Mesh.AccessLogFile != "" {
-		fl := &fileaccesslog.FileAccessLog{
+		fl := &accesslogconfig.FileAccessLog{
 			Path: env.Mesh.AccessLogFile,
 		}
 
@@ -63,8 +69,31 @@ func setAccessLogAndBuildTCPFilter(env *model.Environment, node *model.Proxy, co
 			acc.ConfigType = &accesslog.AccessLog_Config{Config: util.MessageToStruct(fl)}
 		}
 
-		config.AccessLog = []*accesslog.AccessLog{acc}
+		config.AccessLog = append(config.AccessLog, acc)
+	}
 
+	if env.Mesh.DefaultConfig.EnvoyAlsAddress != "" {
+		fl := &accesslogconfig.CommonGrpcAccessLogConfig{
+			LogName: commonEnvoyALSLogName,
+			GrpcService: &core.GrpcService{
+				TargetSpecifier: &core.GrpcService_EnvoyGrpc_{
+					EnvoyGrpc: &core.GrpcService_EnvoyGrpc{
+						ClusterName: pilot.EnvoyALSCluster,
+					},
+				},
+			},
+		}
+
+		acc := &accesslog.AccessLog{
+			Name: xdsutil.HTTPGRPCAccessLog,
+		}
+		if util.IsXDSMarshalingToAnyEnabled(node) {
+			acc.ConfigType = &accesslog.AccessLog_TypedConfig{TypedConfig: util.MessageToAny(fl)}
+		} else {
+			acc.ConfigType = &accesslog.AccessLog_Config{Config: util.MessageToStruct(fl)}
+		}
+
+		config.AccessLog = append(config.AccessLog, acc)
 	}
 
 	tcpFilter := &listener.Filter{
