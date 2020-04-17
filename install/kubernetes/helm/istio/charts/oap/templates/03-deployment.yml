@@ -79,12 +79,18 @@ spec:
         {{- end }}
         - name: SW_STORAGE_ES_CLUSTER_NODES
           value: localhost:9200
+        {{- if .Values.global.elasticsearch.user }}
         - name: SW_ES_USER
-          value: {{ .Values.global.elasticsearch.user }}
+          value: "{{ .Values.global.elasticsearch.user }}"
+        {{- end }}
+        {{- if .Values.global.elasticsearch.password }}
         - name: SW_ES_PASSWORD
-          value: {{ .Values.global.elasticsearch.password }}
-        - name: SW_ES_SECRETS_MANAGEMENT_FILE
-          value: {{ .Values.elasticsearch.secretFile }}
+          value: "{{ .Values.global.elasticsearch.password }}"
+        {{- end }}
+        {{- if .Values.global.elasticsearch.credsFile }}
+        - name: ES_CREDENTIALS_FILE
+          value: "{{ .Values.global.elasticsearch.credsFile }}"
+        {{- end }}
         - name: SW_STORAGE_ENABLE_PACKED_DOWNSAMPLING
           value: "{{ .Values.enabledPackedDownsampling }}"
         - name: SW_STORAGE_DAY_STEP

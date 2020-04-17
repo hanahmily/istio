@@ -199,11 +199,6 @@ data:
     service_instance_4xx = from(ServiceInstance.*).filter(responseCode >= 400).filter(responseCode < 500).cpm();
     service_instance_5xx = from(ServiceInstance.*).filter(responseCode >= 500).cpm();
 
-    // Envoy instance metric
-    // envoy_heap_memory_max_used = from(EnvoyInstanceMetric.value).filter(metricName == "server.memory_heap_size").maxDouble();
-    // envoy_total_connections_used = from(EnvoyInstanceMetric.value).filter(metricName == "server.total_connections").maxDouble();
-    // envoy_parent_connections_used = from(EnvoyInstanceMetric.value).filter(metricName == "server.parent_connections").maxDouble();
-
     // Service relation scope metric for topology
     service_relation_client_cpm = from(ServiceRelation.*).filter(detectPoint == DetectPoint.CLIENT).cpm();
     service_relation_server_cpm = from(ServiceRelation.*).filter(detectPoint == DetectPoint.SERVER).cpm();
@@ -233,6 +228,10 @@ data:
     disable(top_n_database_statement);
     disable(zipkin_span);
     disable(jaeger_span);
+    disable(http_access_log);
+    disable(profile_task);
+    disable(profile_task_log);
+    disable(profile_task_segment_snapshot);
   alarm-settings.yml: |-
     rules:
       # Rule unique name, must be ended with `_rule`.

@@ -87,6 +87,11 @@ spec:
             - name: ES_PASSWORD
               value: "{{ .Values.global.elasticsearch.password }}"
             {{- end }}
+            {{- if .Values.global.elasticsearch.credsFile }}
+            - name: ES_CREDENTIALS_FILE
+              value: "{{ .Values.global.elasticsearch.credsFile }}"
+            {{- end }}
+            - name: 
             {{- if .Values.zipkin.env }}
             {{- range $key, $val := .Values.zipkin.env }}
             - name: {{ $key }}

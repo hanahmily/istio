@@ -20,10 +20,9 @@ oap:
   elasticsearch:
     host: "__HOST__"
     port: 8443
-    secretFile: ""
   analysis: reg-agent-mesh
   logLevel: WARN
-  enabledPackedDownsampling: false
+  enabledPackedDownsampling: true
   dayStep: 1
   externalServices:
     # For SPM metadata service.
@@ -71,5 +70,6 @@ global:
   elasticsearch:
     user: ""
     password: ""
+    credsFile: ""
     ssl:
       enabled: true
